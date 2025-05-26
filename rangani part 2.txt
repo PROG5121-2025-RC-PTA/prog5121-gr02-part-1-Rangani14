@@ -1,0 +1,150 @@
+
+import javax.swing.JOptionPane;
+import java.util.Random;
+
+public class SendMesssage {
+
+    static int totalMessage = 0;
+    static String[] messagesArray;
+
+    public static void main(String[] args) {
+
+        JOptionPane.showMessageDialog(null, "Welcome to QuickChat.");
+        //initialize variables
+        int messageLimit;
+        String userChoice;
+
+        if (!login()) {
+            JOptionPane.showMessageDialog(null, "Login failed");
+            return;
+        }
+
+        messageLimit = Integer.parseInt(JOptionPane.showInputDialog("How many messages would you like to send?"));
+
+        messagesArray = new String[messageLimit];
+
+        boolean keepRuning = true;
+
+        while (keepRuning) {
+            userChoice = JOptionPane.showInputDialog(null,
+                    "Please choose an option:\n1) Send Message\n2) Show Recently Sent Messages (Coming Soon)\n3) Quit");
+
+            if (userChoice.equals("1")) {
+                if (totalMessage < messageLimit) {
+                    sendMessage();
+                } else {
+                    JOptionPane.showMessageDialog(null, "You have reached your message limit.");
+                }
+            } else if (userChoice.equals("2")) {
+                JOptionPane.showMessageDialog(null, "Coming Soon.");
+            } else if (userChoice.equals("3")) {
+                keepRuning = false;
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid option");
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, "Thanks for using QuickChat. Total messages sent: " + totalMessage);
+    }
+
+    public static boolean login() {
+        JOptionPane.showMessageDialog(null, "Time to log in!");
+
+        String username = JOptionPane.showInputDialog(null, "Enter your username for login:\n(Must be more than 5 characters and no underscore)");
+        if (!isValidLoginUsername(username)) {
+            JOptionPane.showMessageDialog(null, "Invalid username.\nIt must be more than 5 characters and contain no underscores.");
+            return false;
+        }
+
+        String password = JOptionPane.showInputDialog(null, "Enter your password for login:");
+        if (!isValidPassword(password)) {
+            JOptionPane.showMessageDialog(null, "Invalid password.\nIt must be at least 8 characters, include a capital letter, number, and special character.");
+            return false;
+        }
+
+        String phone = JOptionPane.showInputDialog(null, "Enter your South African phone number (+27 followed by 9 digits):");
+        if (!isValidPhoneNumber(phone)) {
+            JOptionPane.showMessageDialog(null, "Invalid phone number.\nIt must be in the format +27 followed by 9 digits.");
+            return false;
+        }
+
+        JOptionPane.showMessageDialog(null, "Login successful!");
+        return true;
+    }
+
+    public static boolean isValidLoginUsername(String username) {
+        return username != null && !username.contains("_") && username.length() > 5;
+    }
+
+    public static boolean isValidPassword(String password) {
+        if (password == null || password.length() < 8) {
+            return false;
+        }
+
+        boolean hasUpper = password.matches(".*[A-Z].*");
+        boolean hasDigit = password.matches(".*\\d.*");
+        boolean hasSpecial = password.matches(".*[!@#$%^&()_+\\-={}:;\"'<>|.,?/\\\\].*");
+
+        return hasUpper && hasDigit && hasSpecial;
+    }
+
+    public static boolean isValidPhoneNumber(String number) {
+        return number != null && number.trim().matches("^\\+27\\d{9}$");
+    }
+
+    public static void sendMessage() {
+        //initialize variables
+        String messageID, recipientNumber, messageText, action;
+        String hash;
+        String firstWord;
+        String lastWord;
+        int over;
+        int randomNumber;
+
+        Random random = new Random();
+        randomNumber = random.nextInt(1_000_000_000);
+        messageID = Integer.toString(randomNumber);
+
+        while (messageID.length() < 10) {
+            messageID = "0" + messageID;
+        }
+
+        recipientNumber = JOptionPane.showInputDialog("Enter recipient number (start with +):");
+
+        if (recipientNumber.startsWith("+") && recipientNumber.length() >= 11) {
+            JOptionPane.showMessageDialog(null, "Cell phone number successfully captured.");
+        } else {
+            JOptionPane.showMessageDialog(null, "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.");
+            return;
+        }
+
+        messageText = JOptionPane.showInputDialog("Enter your message:");
+
+        if (messageText.length() > 250) {
+            over = messageText.length() - 250;
+            JOptionPane.showMessageDialog(null, "Message exceeds 250 characters by " + over + ", please reduce size.");
+            return;
+        } else {
+            JOptionPane.showMessageDialog(null, "Message ready to send.");
+        }
+
+        String[] messageWords = messageText.split(" ");
+        firstWord = messageWords[0];
+        lastWord = messageWords[messageWords.length - 1];
+        hash = (messageID.substring(0, 2) + ":" + totalMessage + ":" + firstWord + lastWord).toUpperCase();
+
+        action = JOptionPane.showInputDialog(null,
+                "What would you like to do?\n1) Send Message\n2) Disregard Message\n3) Store Message");
+
+        if (action.equals("1")) {
+            messagesArray[totalMessage] = "MessageID: " + messageID + "\nMessage Hash: " + hash
+                    + "\nRecipient: " + recipientNumber + "\nMessage: " + messageText;
+            totalMessage++;
+            JOptionPane.showMessageDialog(null, "Message successfully sent.");
+        } else if (action.equals("2")) {
+            JOptionPane.showMessageDialog(null, "Press 0 to delete.");
+        } else if (action.equals("3")) {
+            JOptionPane.showMessageDialog(null, "Message successfully stored.");
+        }
+    }
+}
